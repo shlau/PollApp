@@ -41,11 +41,9 @@ const Poll = (props) => {
   const updateUserVoteData = useCallback(() => {
     if (username) {
       const userVotesRef = ref(database, `votes/${username}`);
-      get(userVotesRef).then((snapshot) => {
+      onValue(userVotesRef, (snapshot) => {
         if (snapshot.exists()) {
           const userVotes = snapshot.val();
-          // console.log("userVotes");
-          // console.log(userVotes);
           setUserVotes(userVotes);
         }
       });
@@ -101,6 +99,7 @@ const Poll = (props) => {
           <div key={obj.key} style={{ display: "flex" }}>
             <p>{obj.text}</p>
             <Button
+              disabled={userVotes && userVotes[obj.key]}
               onClick={() => {
                 changeVote(obj.key);
               }}
@@ -108,10 +107,10 @@ const Poll = (props) => {
               +
             </Button>
             <Button
+              disabled={!userVotes || !userVotes[obj.key]}
               onClick={() => {
                 changeVote(obj.key, true);
               }}
-              disabled={obj.votes <= 0}
             >
               -
             </Button>
