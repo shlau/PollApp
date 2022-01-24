@@ -8,6 +8,7 @@ import {
   get,
   set,
   ref,
+  remove,
   onValue,
 } from "firebase/database";
 import Dialog from "@mui/material/Dialog";
@@ -83,8 +84,14 @@ const Poll = (props) => {
         set(votesRef, votes + (wantRemove ? -1 : 1));
       }
     });
-    const usersRef = ref(database, `votes/${username}/${key}`);
-    set(usersRef, !wantRemove);
+    const userVoteRef = ref(database, `votes/${username}/${key}`);
+    set(userVoteRef, !wantRemove);
+  };
+  const removeQuestion = (key) => {
+    const questionRef = child(questionsRef, `${key}`);
+    remove(questionRef);
+    const userVoteRef = ref(database, `votes/${username}/${key}`);
+    remove(userVoteRef);
   };
   useEffect(() => {
     updatePollData();
@@ -115,6 +122,13 @@ const Poll = (props) => {
               -
             </Button>
             <p style={{ fontWeight: "bold" }}>{obj.votes}</p>
+            <Button
+              onClick={() => {
+                removeQuestion(obj.key);
+              }}
+            >
+              Remove
+            </Button>
           </div>
         );
       })}
