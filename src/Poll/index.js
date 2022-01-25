@@ -36,6 +36,7 @@ const Poll = (props) => {
     localStorage.getItem("username"),
     ""
   );
+  const invalidUsername = !username || username.trim().length < 1;
   const { pollId } = useParams();
   const pollRef = ref(database, `polls/${pollId}`);
   const questionsRef = child(pollRef, "questions");
@@ -50,9 +51,14 @@ const Poll = (props) => {
       });
     }
   }, [username]);
-  const handleDialogClose = () => {
-    localStorage.setItem("username", username);
-    setDialogOpen(false);
+  const handleDialogClose = (event, reason) => {
+    if (reason && reason === "backdropClick") {
+      return;
+    }
+    if (!invalidUsername) {
+      localStorage.setItem("username", username);
+      setDialogOpen(false);
+    }
   };
   const getQuestions = () => {
     const questions = pollData.questions;
@@ -142,9 +148,10 @@ const Poll = (props) => {
         />
         <Button onClick={addNewQuestion}>Add</Button>
       </div>
-      <Dialog open={dialogOpen}>
+      <Dialog onClose={handleDialogClose} open={dialogOpen}>
         <TextField
-          variant="outlined"
+          error={invalidUsername}
+          variant="filled"
           label="Enter a username"
           onChange={(e) => {
             setUsername(e.target.value);
