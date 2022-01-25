@@ -1,10 +1,11 @@
-import logo from "./logo.svg";
-import "./App.css";
 import React, { useState } from "react";
+import "./App.css";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, push } from "firebase/database";
+import { getDatabase, ref, push } from "firebase/database";
 import { useNavigate } from "react-router-dom";
-
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import { makeStyles } from "@mui/styles";
 const firebaseConfig = {
   apiKey: "AIzaSyCYpfY6-nwPPKZp7O5BClCmQYy3okNn_GM",
   authDomain: "cyan-poll-14eb3.firebaseapp.com",
@@ -16,6 +17,7 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 function App() {
   const navigate = useNavigate();
+  const classes = useStyles();
   const createNewPoll = () => {
     const pollsRef = ref(database, "polls");
     const pollId = push(pollsRef, { title: pollName }).key;
@@ -23,29 +25,33 @@ function App() {
   };
   const [pollName, setPollName] = useState("");
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <input
-          type="text"
-          value={pollName}
-          onChange={(e) => setPollName(e.target.value)}
-        />
-        <button onClick={createNewPoll}>Create New Poll</button>
-      </header>
+    <div className={"App-header"}>
+      <TextField
+        className={classes.textfield}
+        variant="outlined"
+        value={pollName}
+        onChange={(e) => setPollName(e.target.value)}
+        placeholder={'Poll Title'}
+      />
+      <Button
+        className={classes.button}
+        variant="contained"
+        onClick={createNewPoll}
+      >
+        Create New Poll
+      </Button>
     </div>
   );
 }
-
+const useStyles = makeStyles({
+  textfield: {
+    "& .MuiOutlinedInput-root": { height: 40, width: 300, background: "white" },
+  },
+  button: {
+    "&": {
+      width: 300,
+      marginTop: "20px !important",
+    },
+  },
+});
 export default App;
