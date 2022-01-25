@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { initializeApp } from "firebase/app";
 import { makeStyles } from "@mui/styles";
 import Checkbox from "@mui/material/Checkbox";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import {
   getDatabase,
   child,
@@ -26,11 +28,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const localStorage = window.localStorage;
-
 const Poll = (props) => {
   const [newQuestion, setNewQuestion] = useState("");
   const [pollData, setPollData] = useState({});
   const [userVotes, setUserVotes] = useState({});
+  const [toastOpen, setToastOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(
     localStorage.getItem("username") == null
   );
@@ -108,6 +110,16 @@ const Poll = (props) => {
   const classes = useStyles();
   return (
     <div className={"App-header"}>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={toastOpen}
+        autoHideDuration={3000}
+        onClose={() => setToastOpen(false)}
+      >
+        <Alert severity="success" onClose={() => setToastOpen(false)}>
+          Link Copied!
+        </Alert>
+      </Snackbar>
       <div style={{ width: "50%" }}>
         <div
           style={{ background: "cadetblue", textAlign: "center", padding: 10 }}
@@ -201,6 +213,36 @@ const Poll = (props) => {
           </Dialog>
         </div>
       </div>
+      <div>
+        <input
+          readOnly
+          type="text"
+          id="copyText"
+          value={window.location.href}
+        />
+        <Button
+          onClick={() => {
+            if (!navigator.clipboard) {
+              const copyText = document.querySelector("#copyText");
+              copyText.select();
+              document.execCommand("copy");
+              setToastOpen(true);
+            } else {
+              navigator.clipboard
+                .writeText(window.location.href)
+                .then(() => {
+                  console.log("link copied");
+                  setToastOpen(true);
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            }
+          }}
+        >
+          Copy
+        </Button>
+      </div>
     </div>
   );
 };
@@ -208,6 +250,7 @@ const useStyles = makeStyles({
   textfield: {
     "&": {
       flex: 1,
+      marginRight: "10px !important",
     },
   },
   button: {
