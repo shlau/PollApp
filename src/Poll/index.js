@@ -1,52 +1,19 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { initializeApp } from "firebase/app";
-import { makeStyles } from "@mui/styles";
-import Checkbox from "@mui/material/Checkbox";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import {
-  getDatabase,
-  child,
-  push,
-  get,
-  set,
-  ref,
-  remove,
-  onValue,
-} from "firebase/database";
-import Dialog from "@mui/material/Dialog";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-const firebaseConfig = {
-  apiKey: "AIzaSyCYpfY6-nwPPKZp7O5BClCmQYy3okNn_GM",
-  authDomain: "cyan-poll-14eb3.firebaseapp.com",
-  databaseURL: "https://cyan-poll-default-rtdb.firebaseio.com/",
-  storageBucket: "gs://cyan-poll.appspot.com",
-};
-
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+import UsernameDialog from "./components/UsernameDialog";
+import Footer from "./components/Footer";
+import AddQuestionField from "./components/AddQuestionField";
+import { ref, onValue } from "firebase/database";
+import Entries from "./components/Entries";
 const localStorage = window.localStorage;
-const Poll = (props) => {
-  const [newQuestion, setNewQuestion] = useState("");
-  const [pollData, setPollData] = useState({});
+const Poll = ({ database }) => {
+  const [questions, setQuestions] = useState([]);
+  const [voteCounts, setVoteCounts] = useState({});
   const [userVotes, setUserVotes] = useState({});
-  const [toastOpen, setToastOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(
-    localStorage.getItem("username") == null
-  );
-  const [username, setUsername] = useState(
-    localStorage.getItem("username"),
-    ""
-  );
-  const navigate = useNavigate();
-  const invalidUsername = !username || username.trim().length < 1;
+  const [title, setTitle] = useState("");
   const { pollId } = useParams();
-  const pollRef = ref(database, `polls/${pollId}`);
-  const questionsRef = child(pollRef, "questions");
   const updateUserVoteData = useCallback(() => {
+    const username = localStorage.getItem("username");
     if (username) {
       const userVotesRef = ref(database, `votes/${username}`);
       onValue(userVotesRef, (snapshot) => {
@@ -56,77 +23,49 @@ const Poll = (props) => {
         }
       });
     }
-  }, [username]);
-  const handleDialogClose = (event, reason) => {
-    if (reason && reason === "backdropClick") {
-      return;
-    }
-    if (!invalidUsername) {
-      localStorage.setItem("username", username);
-      setDialogOpen(false);
-    }
-  };
-  const getQuestions = () => {
-    const questions = pollData.questions;
-    const formattedQuestions = [];
-    for (const key in questions) {
-      const questionData = questions[key];
-      formattedQuestions.push({
-        ...questionData,
-        key: key,
-      });
-    }
-    return formattedQuestions;
-  };
-  const questions = getQuestions();
+  }, [database]);
   const updatePollData = useCallback(() => {
+    const pollRef = ref(database, `polls/${pollId}`);
     onValue(pollRef, (snapshot) => {
       const data = snapshot.val();
-      setPollData(data);
-    });
-  }, [pollId]);
-  const addNewQuestion = () => {
-    push(questionsRef, { text: newQuestion, votes: 0 });
-  };
-  const changeVote = (key, wantRemove) => {
-    const votesRef = child(questionsRef, `${key}/votes`);
-    get(votesRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        const votes = snapshot.val();
-        set(votesRef, votes + (wantRemove ? -1 : 1));
+      const pollQuestions = data.questions;
+      const formattedQuestions = [];
+      for (const key in pollQuestions) {
+        const questionData = pollQuestions[key];
+        formattedQuestions.push({
+          ...questionData,
+          key: key,
+        });
       }
+      setQuestions(formattedQuestions);
+      setVoteCounts(data["vote-count"]);
+      setTitle(data["title"]);
     });
-    const userVoteRef = ref(database, `votes/${username}/${key}`);
-    set(userVoteRef, !wantRemove);
-  };
-  const removeQuestion = (key) => {
-    const questionRef = child(questionsRef, `${key}`);
-    remove(questionRef);
-    const userVoteRef = ref(database, `votes/${username}/${key}`);
-    remove(userVoteRef);
+  }, [pollId, database]);
+  const changeVote = (key, wantRemove) => {
+    setUserVotes((prevVotes) => ({ ...prevVotes, [key]: !wantRemove }));
+    setVoteCounts((prevCounts) => ({
+      ...prevCounts,
+      [key]: prevCounts[key] + (wantRemove ? -1 : 1),
+    }));
   };
   useEffect(() => {
-    updatePollData();
-    updateUserVoteData();
+    let isMounted = true;
+    if (isMounted) {
+      updatePollData();
+      updateUserVoteData();
+    }
+    return () => {
+      isMounted = false;
+    };
   }, [updatePollData, updateUserVoteData]);
-  const classes = useStyles();
   return (
     <div className={"App-header"}>
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        open={toastOpen}
-        autoHideDuration={3000}
-        onClose={() => setToastOpen(false)}
-      >
-        <Alert severity="success" onClose={() => setToastOpen(false)}>
-          Link Copied!
-        </Alert>
-      </Snackbar>
       <div style={{ width: "50%" }}>
         <div
           style={{ background: "cadetblue", textAlign: "center", padding: 10 }}
         >
-          {pollData.title}
+          {title}
         </div>
         <div
           style={{
@@ -136,148 +75,25 @@ const Poll = (props) => {
             fontSize: 20,
           }}
         >
-          {questions.map((obj) => {
-            return (
-              <div
-                key={obj.key}
-                style={{ display: "flex", borderBottom: "3px solid cadetblue" }}
-              >
-                <p style={{ flex: 1 }}>{obj.text}</p>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <p style={{ margin: "0px 0px 3px 0px", fontWeight: "bold" }}>
-                    {obj.votes}
-                  </p>
-                  <Checkbox
-                    checked={userVotes[obj.key] ? true : false}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      changeVote(obj.key, !checked);
-                    }}
-                  />
-                  <Button
-                    size="small"
-                    variant="contained"
-                    className={classes.removeButton}
-                    onClick={() => {
-                      removeQuestion(obj.key);
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-          <div style={{ display: "flex", marginTop: 20, height: 40 }}>
-            <TextField
-              className={classes.textfield}
-              variant="outlined"
-              size="small"
-              label="Enter a new question"
-              onChange={(e) => {
-                setNewQuestion(e.target.value);
-              }}
-            />
-            <Button
-              className={classes.addButton}
-              variant="contained"
-              onClick={addNewQuestion}
-            >
-              Add
-            </Button>
-          </div>
-          <Dialog onClose={handleDialogClose} open={dialogOpen}>
-            <TextField
-              error={invalidUsername}
-              variant="filled"
-              label="Enter a username"
-              onChange={(e) => {
-                setUsername(e.target.value);
-              }}
-            />
-            <Button onClick={handleDialogClose}>Ok</Button>
-          </Dialog>
-        </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          marginTop: 10,
-          justifyContent: "space-evenly",
-          width: 600,
-        }}
-      >
-        <Button
-          onClick={() => {
-            navigate(`/results/${pollId}`);
-          }}
-          className={classes.resultsButton}
-          variant="contained"
-        >
-          Results
-        </Button>
-        <div
-          style={{
-            display: "flex",
-            height: 30,
-          }}
-        >
-          <input
-            readOnly
-            type="text"
-            id="copyText"
-            value={window.location.href}
+          <Entries
+            questions={questions}
+            userVotes={userVotes}
+            voteCounts={voteCounts}
+            changeVote={changeVote}
+            pollId={pollId}
+            database={database}
           />
-          <Button
-            variant="contained"
-            onClick={() => {
-              if (!navigator.clipboard) {
-                const copyText = document.querySelector("#copyText");
-                copyText.select();
-                document.execCommand("copy");
-                setToastOpen(true);
-              } else {
-                navigator.clipboard
-                  .writeText(window.location.href)
-                  .then(() => {
-                    console.log("link copied");
-                    setToastOpen(true);
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
-              }
-            }}
-          >
-            Copy
-          </Button>
+          <AddQuestionField pollId={pollId} database={database} />
+          <UsernameDialog />
         </div>
       </div>
+      <Footer
+        pollId={pollId}
+        database={database}
+        userVotes={userVotes}
+        voteCounts={voteCounts}
+      />
     </div>
   );
 };
-const useStyles = makeStyles({
-  textfield: {
-    "&": {
-      flex: 1,
-      marginRight: "10px !important",
-    },
-  },
-  addButton: {
-    "&": {
-      background: "green !important",
-    },
-  },
-  removeButton: {
-    "&": {
-      height: 40,
-      background: "#D53614 !important",
-    },
-  },
-  resultsButton: {
-    "&": {
-      height: 30,
-    },
-  },
-});
 export default Poll;

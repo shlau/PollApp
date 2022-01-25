@@ -4,11 +4,15 @@ import "./index.css";
 import MainRouter from "./MainRouter";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
-
+import firebaseConfig from "./config";
+import { getDatabase } from "firebase/database";
+import { initializeApp } from "firebase/app";
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <MainRouter />
+      <MainRouter database={database} />
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root")

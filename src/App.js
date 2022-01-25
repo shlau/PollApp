@@ -1,21 +1,11 @@
 import React, { useState } from "react";
 import "./App.css";
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push } from "firebase/database";
+import { ref, push } from "firebase/database";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { makeStyles } from "@mui/styles";
-const firebaseConfig = {
-  apiKey: "AIzaSyCYpfY6-nwPPKZp7O5BClCmQYy3okNn_GM",
-  authDomain: "cyan-poll-14eb3.firebaseapp.com",
-  databaseURL: "https://cyan-poll-default-rtdb.firebaseio.com/",
-  storageBucket: "gs://cyan-poll.appspot.com",
-};
-
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-function App() {
+function App({ database }) {
   const navigate = useNavigate();
   const classes = useStyles();
   const createNewPoll = () => {
@@ -31,7 +21,7 @@ function App() {
         variant="outlined"
         value={pollName}
         onChange={(e) => setPollName(e.target.value)}
-        placeholder={'Poll Title'}
+        placeholder={"Poll Title"}
       />
       <Button
         className={classes.button}

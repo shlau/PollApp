@@ -3,14 +3,16 @@ import App from "./App";
 import Poll from "./Poll";
 import Results from "./Results";
 import { Routes, Route } from "react-router-dom";
-const MainRouter = (props) => {
+const MainRouter = ({ database }) => {
   return (
     <div>
       <Routes>
-        <Route exact path="/" element={<App />} />
-        {/* <Route exact path="/poll" element={<Poll/>} /> */}
-        <Route path="/poll/:pollId" element={<Poll />} />
-        <Route path="/results/:pollId" element={<Results />} />
+        <Route exact path="/" element={<App database={database} />} />
+        <Route path="/poll/:pollId" element={<Poll database={database} />} />
+        <Route
+          path="/results/:pollId"
+          element={<Results database={database} />}
+        />
       </Routes>
     </div>
   );
