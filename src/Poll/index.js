@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { initializeApp } from "firebase/app";
+import { makeStyles } from "@mui/styles";
+import Checkbox from "@mui/material/Checkbox";
 import {
   getDatabase,
   child,
@@ -103,63 +105,115 @@ const Poll = (props) => {
     updatePollData();
     updateUserVoteData();
   }, [updatePollData, updateUserVoteData]);
+  const classes = useStyles();
   return (
-    <div>
-      {pollId}
-      {pollData.title}
-      {questions.map((obj) => {
-        return (
-          <div key={obj.key} style={{ display: "flex" }}>
-            <p>{obj.text}</p>
-            <Button
-              disabled={userVotes && userVotes[obj.key]}
-              onClick={() => {
-                changeVote(obj.key);
+    <div className={"App-header"}>
+      <div style={{ width: "50%" }}>
+        <div
+          style={{ background: "cadetblue", textAlign: "center", padding: 10 }}
+        >
+          {pollData.title}
+        </div>
+        <div
+          style={{
+            background: "#f0f2f5",
+            color: "black",
+            padding: "5px 10px 30px 10px",
+            fontSize: 20,
+          }}
+        >
+          {questions.map((obj) => {
+            return (
+              <div
+                key={obj.key}
+                style={{ display: "flex", borderBottom: "3px solid cadetblue" }}
+              >
+                <p style={{ flex: 1 }}>{obj.text}</p>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <p style={{ margin: "0px 0px 3px 0px", fontWeight: "bold" }}>
+                    {obj.votes}
+                  </p>
+                  {/* <Button
+                    size="small"
+                    variant="contained"
+                    disabled={userVotes && userVotes[obj.key]}
+                    onClick={() => {
+                      changeVote(obj.key);
+                    }}
+                  >
+                    +
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    disabled={!userVotes || !userVotes[obj.key]}
+                    onClick={() => {
+                      changeVote(obj.key, true);
+                    }}
+                  >
+                    -
+                  </Button> */}
+                  <Checkbox
+                    checked={userVotes[obj.key] ? true : false}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      changeVote(obj.key, !checked);
+                    }}
+                  />
+                  <Button
+                    size="small"
+                    variant="contained"
+                    className={classes.button}
+                    onClick={() => {
+                      removeQuestion(obj.key);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+          <div style={{ display: "flex", marginTop: 20, height: 40 }}>
+            <TextField
+              className={classes.textfield}
+              variant="outlined"
+              size="small"
+              label="Enter a new question"
+              onChange={(e) => {
+                setNewQuestion(e.target.value);
               }}
-            >
-              +
-            </Button>
-            <Button
-              disabled={!userVotes || !userVotes[obj.key]}
-              onClick={() => {
-                changeVote(obj.key, true);
-              }}
-            >
-              -
-            </Button>
-            <p style={{ fontWeight: "bold" }}>{obj.votes}</p>
-            <Button
-              onClick={() => {
-                removeQuestion(obj.key);
-              }}
-            >
-              Remove
+            />
+            <Button variant="contained" onClick={addNewQuestion}>
+              Add
             </Button>
           </div>
-        );
-      })}
-      <div style={{ display: "flex" }}>
-        <TextField
-          variant="outlined"
-          label="Enter a new question"
-          onChange={(e) => {
-            setNewQuestion(e.target.value);
-          }}
-        />
-        <Button onClick={addNewQuestion}>Add</Button>
+          <Dialog onClose={handleDialogClose} open={dialogOpen}>
+            <TextField
+              error={invalidUsername}
+              variant="filled"
+              label="Enter a username"
+              onChange={(e) => {
+                setUsername(e.target.value);
+              }}
+            />
+            <Button onClick={handleDialogClose}>Ok</Button>
+          </Dialog>
+        </div>
       </div>
-      <Dialog onClose={handleDialogClose} open={dialogOpen}>
-        <TextField
-          error={invalidUsername}
-          variant="filled"
-          label="Enter a username"
-          onChange={(e) => {
-            setUsername(e.target.value);
-          }}
-        />
-        <Button onClick={handleDialogClose}>Ok</Button>
-      </Dialog>
     </div>
   );
 };
+const useStyles = makeStyles({
+  textfield: {
+    "&": {
+      flex: 1,
+    },
+  },
+  button: {
+    "&": {
+      height: 40,
+    },
+  },
+});
 export default Poll;
