@@ -1,6 +1,7 @@
 import React from "react";
 import App from "./App";
 import Poll from "./Poll";
+import Results from "./Results";
 import { Routes, Route } from "react-router-dom";
 const MainRouter = (props) => {
   return (
@@ -9,6 +10,7 @@ const MainRouter = (props) => {
         <Route exact path="/" element={<App />} />
         {/* <Route exact path="/poll" element={<Poll/>} /> */}
         <Route path="/poll/:pollId" element={<Poll />} />
+        <Route path="/results/:pollId" element={<Results />} />
       </Routes>
     </div>
   );

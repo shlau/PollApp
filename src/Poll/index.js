@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { initializeApp } from "firebase/app";
 import { makeStyles } from "@mui/styles";
 import Checkbox from "@mui/material/Checkbox";
@@ -40,6 +41,7 @@ const Poll = (props) => {
     localStorage.getItem("username"),
     ""
   );
+  const navigate = useNavigate();
   const invalidUsername = !username || username.trim().length < 1;
   const { pollId } = useParams();
   const pollRef = ref(database, `polls/${pollId}`);
@@ -145,26 +147,6 @@ const Poll = (props) => {
                   <p style={{ margin: "0px 0px 3px 0px", fontWeight: "bold" }}>
                     {obj.votes}
                   </p>
-                  {/* <Button
-                    size="small"
-                    variant="contained"
-                    disabled={userVotes && userVotes[obj.key]}
-                    onClick={() => {
-                      changeVote(obj.key);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    disabled={!userVotes || !userVotes[obj.key]}
-                    onClick={() => {
-                      changeVote(obj.key, true);
-                    }}
-                  >
-                    -
-                  </Button> */}
                   <Checkbox
                     checked={userVotes[obj.key] ? true : false}
                     onChange={(e) => {
@@ -175,7 +157,7 @@ const Poll = (props) => {
                   <Button
                     size="small"
                     variant="contained"
-                    className={classes.button}
+                    className={classes.removeButton}
                     onClick={() => {
                       removeQuestion(obj.key);
                     }}
@@ -196,7 +178,11 @@ const Poll = (props) => {
                 setNewQuestion(e.target.value);
               }}
             />
-            <Button variant="contained" onClick={addNewQuestion}>
+            <Button
+              className={classes.addButton}
+              variant="contained"
+              onClick={addNewQuestion}
+            >
               Add
             </Button>
           </div>
@@ -213,35 +199,59 @@ const Poll = (props) => {
           </Dialog>
         </div>
       </div>
-      <div>
-        <input
-          readOnly
-          type="text"
-          id="copyText"
-          value={window.location.href}
-        />
+      <div
+        style={{
+          display: "flex",
+          marginTop: 10,
+          justifyContent: "space-evenly",
+          width: 600,
+        }}
+      >
         <Button
           onClick={() => {
-            if (!navigator.clipboard) {
-              const copyText = document.querySelector("#copyText");
-              copyText.select();
-              document.execCommand("copy");
-              setToastOpen(true);
-            } else {
-              navigator.clipboard
-                .writeText(window.location.href)
-                .then(() => {
-                  console.log("link copied");
-                  setToastOpen(true);
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            }
+            navigate(`/results/${pollId}`);
+          }}
+          className={classes.resultsButton}
+          variant="contained"
+        >
+          Results
+        </Button>
+        <div
+          style={{
+            display: "flex",
+            height: 30,
           }}
         >
-          Copy
-        </Button>
+          <input
+            readOnly
+            type="text"
+            id="copyText"
+            value={window.location.href}
+          />
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (!navigator.clipboard) {
+                const copyText = document.querySelector("#copyText");
+                copyText.select();
+                document.execCommand("copy");
+                setToastOpen(true);
+              } else {
+                navigator.clipboard
+                  .writeText(window.location.href)
+                  .then(() => {
+                    console.log("link copied");
+                    setToastOpen(true);
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              }
+            }}
+          >
+            Copy
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -253,9 +263,20 @@ const useStyles = makeStyles({
       marginRight: "10px !important",
     },
   },
-  button: {
+  addButton: {
+    "&": {
+      background: "green !important",
+    },
+  },
+  removeButton: {
     "&": {
       height: 40,
+      background: "#D53614 !important",
+    },
+  },
+  resultsButton: {
+    "&": {
+      height: 30,
     },
   },
 });
