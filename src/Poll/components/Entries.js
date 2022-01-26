@@ -35,7 +35,7 @@ const Entries = ({
                   checked={userVotes && userVotes[obj.key] ? true : false}
                   onChange={(e) => {
                     const checked = e.target.checked;
-                    changeVote(obj.key, !checked);
+                    changeVote(obj.key, checked);
                   }}
                 />
                 <Button

@@ -47,8 +47,8 @@ const Poll = ({ database }) => {
       setLoading(false);
     });
   }, [pollId, database]);
-  const changeVote = (key, wantRemove) => {
-    setUserVotes((prevVotes) => ({ ...prevVotes, [key]: !wantRemove }));
+  const changeVote = (key, checked) => {
+    setUserVotes((prevVotes) => ({ ...prevVotes, [key]: checked }));
   };
   useEffect(() => {
     let isMounted = true;
