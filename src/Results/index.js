@@ -4,6 +4,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
+import { makeStyles } from "@mui/styles";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useParams } from "react-router-dom";
@@ -42,10 +43,11 @@ const Results = ({ database }) => {
     const voteCount = getVoteCount(question);
     chartData.push({ arg: question.text, val: voteCount });
   });
+  const classes = useStyles();
   return (
-    <div>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 300 }}>
+    <div className="App-header">
+      <TableContainer className={classes.table} component={Paper}>
+        <Table>
           <TableHead>
             <TableRow>
               <TableCell>{""}</TableCell>
@@ -76,7 +78,7 @@ const Results = ({ database }) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Paper sx={{ marginTop: 10, padding: 10 }}>
+      <Paper sx={{ minWidth: 560, marginTop: 10, padding: 10 }}>
         <Chart title={"Results"} dataSource={chartData} id="chart">
           <Series type="bar" />
           <Legend visible={false} />
@@ -85,4 +87,11 @@ const Results = ({ database }) => {
     </div>
   );
 };
+const useStyles = makeStyles({
+  table: {
+    "&": {
+      width: "fit-content",
+    },
+  },
+});
 export default Results;

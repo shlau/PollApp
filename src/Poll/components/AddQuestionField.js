@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { push, set, ref } from "firebase/database";
+import { push, ref } from "firebase/database";
 const AddQuestionField = ({ pollId, database }) => {
   const [newQuestion, setNewQuestion] = useState("");
   const classes = useStyles();
@@ -10,11 +10,13 @@ const AddQuestionField = ({ pollId, database }) => {
     if (newQuestion && newQuestion.trim().length > 0) {
       const questionsRef = ref(database, `polls/${pollId}/questions`);
       push(questionsRef, { text: newQuestion });
+      setNewQuestion("");
     }
   };
   return (
     <div style={{ display: "flex", marginTop: 20, height: 40 }}>
       <TextField
+        value={newQuestion}
         className={classes.textfield}
         variant="outlined"
         size="small"

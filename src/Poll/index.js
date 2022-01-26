@@ -24,10 +24,11 @@ const Poll = ({ database }) => {
       const data = snapshot.val();
       const pollQuestions = data.questions;
       const formattedQuestions = getArrFromObj(pollQuestions, "key");
+      const users = data.votes ? data.votes[username] : {};
       setQuestions(formattedQuestions);
-      setTitle(data["title"]);
-      setUserVotes(data["votes"][username]);
-      setUsers(data["voters"]);
+      setTitle(data["title"] || "");
+      setUserVotes(users);
+      setUsers(data["voters"] || {});
       setLoading(false);
     });
   }, [pollId, database]);
