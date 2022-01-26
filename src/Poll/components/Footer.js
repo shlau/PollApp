@@ -4,10 +4,10 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
-import { set, ref } from "firebase/database";
+import { set, ref, get } from "firebase/database";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
-const Footer = ({ pollId, database, userVotes }) => {
+const Footer = ({ pollId, database, userVotes, updatePollData }) => {
   const [toastOpen, setToastOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,17 +16,29 @@ const Footer = ({ pollId, database, userVotes }) => {
     setLoading(true);
     const username = localStorage.getItem("username");
     const currentTimestamp = new Date().getTime();
-    const promise1 = set(
-      ref(database, `polls/${pollId}/voters/${username}`),
-      currentTimestamp
-    );
-    const promise2 = set(
-      ref(database, `polls/${pollId}/votes/${username}`),
-      userVotes
-    );
-    Promise.all([promise1, promise2]).then(() => {
-      setLoading(false);
-      navigate(`/results/${pollId}`);
+    get(ref(database, `polls/${pollId}/questions`)).then((snapshot) => {
+      let questions = {};
+      if (snapshot.exists()) {
+        questions = snapshot.val();
+      }
+      let updatedUserVotes = { ...userVotes };
+      for (const key in updatedUserVotes) {
+        if (questions[key] == null) {
+          updatedUserVotes[key] = null;
+        }
+      }
+      const promise1 = set(
+        ref(database, `polls/${pollId}/voters/${username}`),
+        currentTimestamp
+      );
+      const promise2 = set(
+        ref(database, `polls/${pollId}/votes/${username}`),
+        updatedUserVotes
+      );
+      Promise.all([promise1, promise2]).then(() => {
+        setLoading(false);
+        navigate(`/results/${pollId}`);
+      });
     });
   };
   return (
@@ -85,13 +97,27 @@ const Footer = ({ pollId, database, userVotes }) => {
             Copy
           </Button>
         </div>
-        <Button
-          onClick={confirmVotes}
-          className={classes.confirmButton}
-          variant="contained"
-        >
-          Confirm Votes
-        </Button>
+        <div style={{ display: "flex" }} className={classes.navButton}>
+          <Button
+            sx={{ marginRight: 1 }}
+            onClick={() => {
+              navigate(`/results/${pollId}`);
+            }}
+            variant="contained"
+          >
+            View Results
+          </Button>
+          <Button
+            sx={{ marginRight: 1 }}
+            onClick={updatePollData}
+            variant="contained"
+          >
+            Refresh
+          </Button>
+          <Button onClick={confirmVotes} variant="contained">
+            Confirm Votes
+          </Button>
+        </div>
       </div>
       {loading && (
         <Box sx={{ width: "100%", marginTop: "30px" }}>
@@ -102,8 +128,8 @@ const Footer = ({ pollId, database, userVotes }) => {
   );
 };
 const useStyles = makeStyles({
-  confirmButton: {
-    "&": {
+  navButton: {
+    "& > .MuiButton-root": {
       height: 30,
     },
   },

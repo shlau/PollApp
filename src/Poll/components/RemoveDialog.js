@@ -9,6 +9,7 @@ const RemoveDialog = ({
   removeDialogOpen,
   setRemoveDialogOpen,
   users,
+  updateQuestion
 }) => {
   const handleRemoveDialogClose = () => {
     setRemoveDialogOpen(false);
@@ -20,6 +21,7 @@ const RemoveDialog = ({
       updates[`polls/${pollId}/votes/${user}/${removeKey}`] = null;
     }
     update(ref(database), updates);
+    updateQuestion(removeKey)
     setRemoveDialogOpen(false);
   };
   return (

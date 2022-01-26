@@ -3,13 +3,14 @@ import { makeStyles } from "@mui/styles";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { push, ref } from "firebase/database";
-const AddQuestionField = ({ pollId, database }) => {
+const AddQuestionField = ({ pollId, database, updateQuestion }) => {
   const [newQuestion, setNewQuestion] = useState("");
   const classes = useStyles();
   const addNewQuestion = () => {
     if (newQuestion && newQuestion.trim().length > 0) {
       const questionsRef = ref(database, `polls/${pollId}/questions`);
-      push(questionsRef, { text: newQuestion });
+      const newQuestionKey = push(questionsRef, { text: newQuestion }).key;
+      updateQuestion(newQuestionKey, newQuestion);
       setNewQuestion("");
     }
   };

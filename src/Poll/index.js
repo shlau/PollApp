@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { CircularProgress } from "@mui/material";
+import CircularLoading from "../CircularLoading";
 import { useParams } from "react-router-dom";
 import UsernameDialog from "./components/UsernameDialog";
 import Footer from "./components/Footer";
 import AddQuestionField from "./components/AddQuestionField";
-import { ref, onValue } from "firebase/database";
+import { get, ref } from "firebase/database";
 import Entries from "./components/Entries";
-import Box from "@mui/material/Box";
-import { makeStyles } from "@mui/styles";
 import { getArrFromObj } from "../utils";
 const localStorage = window.localStorage;
 const Poll = ({ database }) => {
@@ -17,10 +15,27 @@ const Poll = ({ database }) => {
   const [users, setUsers] = useState({});
   const [loading, setLoading] = useState(true);
   const { pollId } = useParams();
+  const updateQuestion = (key, newVal) => {
+    if (newVal != null) {
+      setQuestions((prevQuestions) => [
+        ...prevQuestions,
+        { key: key, text: newVal },
+      ]);
+    } else {
+      setQuestions((prevQuestions) => {
+        const newQuestions = prevQuestions.map((questionData) =>
+          questionData.key === key ? null : questionData
+        );
+        return newQuestions;
+      });
+      setUserVotes((prevVotes) => ({ ...prevVotes, [key]: null }));
+    }
+  };
   const updatePollData = useCallback(() => {
     const pollRef = ref(database, `polls/${pollId}`);
     const username = localStorage.getItem("username");
-    onValue(pollRef, (snapshot) => {
+    setLoading(true);
+    get(pollRef).then((snapshot) => {
       const data = snapshot.val();
       const pollQuestions = data.questions;
       const formattedQuestions = getArrFromObj(pollQuestions, "key");
@@ -44,14 +59,9 @@ const Poll = ({ database }) => {
       isMounted = false;
     };
   }, [updatePollData]);
-  const classes = useStyles();
   return (
     <div className={"App-header"}>
-      {loading && (
-        <Box sx={{ display: "flex" }}>
-          <CircularProgress className={classes.loading} />
-        </Box>
-      )}
+      {loading && <CircularLoading />}
       {!loading && (
         <>
           <div style={{ width: "50%" }}>
@@ -79,23 +89,25 @@ const Poll = ({ database }) => {
                 pollId={pollId}
                 database={database}
                 users={users}
+                updateQuestion={updateQuestion}
               />
-              <AddQuestionField pollId={pollId} database={database} />
+              <AddQuestionField
+                pollId={pollId}
+                database={database}
+                updateQuestion={updateQuestion}
+              />
               <UsernameDialog />
             </div>
           </div>
-          <Footer pollId={pollId} database={database} userVotes={userVotes} />
+          <Footer
+            pollId={pollId}
+            database={database}
+            userVotes={userVotes}
+            updatePollData={updatePollData}
+          />
         </>
       )}
     </div>
   );
 };
-const useStyles = makeStyles({
-  loading: {
-    "&": {
-      width: "240px !important",
-      height: "240px !important",
-    },
-  },
-});
 export default Poll;
