@@ -1,99 +1,100 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
 import { useParams } from "react-router-dom";
 import UsernameDialog from "./components/UsernameDialog";
 import Footer from "./components/Footer";
 import AddQuestionField from "./components/AddQuestionField";
 import { ref, onValue } from "firebase/database";
 import Entries from "./components/Entries";
+import Box from "@mui/material/Box";
+import { makeStyles } from "@mui/styles";
+import { getArrFromObj } from "../utils";
 const localStorage = window.localStorage;
 const Poll = ({ database }) => {
   const [questions, setQuestions] = useState([]);
-  const [voteCounts, setVoteCounts] = useState({});
   const [userVotes, setUserVotes] = useState({});
   const [title, setTitle] = useState("");
+  const [users, setUsers] = useState({});
+  const [loading, setLoading] = useState(true);
   const { pollId } = useParams();
-  const updateUserVoteData = useCallback(() => {
-    const username = localStorage.getItem("username");
-    if (username) {
-      const userVotesRef = ref(database, `votes/${username}`);
-      onValue(userVotesRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const userVotes = snapshot.val();
-          setUserVotes(userVotes);
-        }
-      });
-    }
-  }, [database]);
   const updatePollData = useCallback(() => {
     const pollRef = ref(database, `polls/${pollId}`);
+    const username = localStorage.getItem("username");
     onValue(pollRef, (snapshot) => {
       const data = snapshot.val();
       const pollQuestions = data.questions;
-      const formattedQuestions = [];
-      for (const key in pollQuestions) {
-        const questionData = pollQuestions[key];
-        formattedQuestions.push({
-          ...questionData,
-          key: key,
-        });
-      }
+      const formattedQuestions = getArrFromObj(pollQuestions, "key");
       setQuestions(formattedQuestions);
-      setVoteCounts(data["vote-count"]);
       setTitle(data["title"]);
+      setUserVotes(data["votes"][username]);
+      setUsers(data["voters"]);
+      setLoading(false);
     });
   }, [pollId, database]);
   const changeVote = (key, wantRemove) => {
     setUserVotes((prevVotes) => ({ ...prevVotes, [key]: !wantRemove }));
-    setVoteCounts((prevCounts) => ({
-      ...prevCounts,
-      [key]: prevCounts[key] + (wantRemove ? -1 : 1),
-    }));
   };
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
       updatePollData();
-      updateUserVoteData();
     }
     return () => {
       isMounted = false;
     };
-  }, [updatePollData, updateUserVoteData]);
+  }, [updatePollData]);
+  const classes = useStyles();
   return (
     <div className={"App-header"}>
-      <div style={{ width: "50%" }}>
-        <div
-          style={{ background: "cadetblue", textAlign: "center", padding: 10 }}
-        >
-          {title}
-        </div>
-        <div
-          style={{
-            background: "#f0f2f5",
-            color: "black",
-            padding: "5px 10px 30px 10px",
-            fontSize: 20,
-          }}
-        >
-          <Entries
-            questions={questions}
-            userVotes={userVotes}
-            voteCounts={voteCounts}
-            changeVote={changeVote}
-            pollId={pollId}
-            database={database}
-          />
-          <AddQuestionField pollId={pollId} database={database} />
-          <UsernameDialog />
-        </div>
-      </div>
-      <Footer
-        pollId={pollId}
-        database={database}
-        userVotes={userVotes}
-        voteCounts={voteCounts}
-      />
+      {loading && (
+        <Box sx={{ display: "flex" }}>
+          <CircularProgress className={classes.loading} />
+        </Box>
+      )}
+      {!loading && (
+        <>
+          <div style={{ width: "50%" }}>
+            <div
+              style={{
+                background: "cadetblue",
+                textAlign: "center",
+                padding: 10,
+              }}
+            >
+              {title}
+            </div>
+            <div
+              style={{
+                background: "#f0f2f5",
+                color: "black",
+                padding: "5px 10px 30px 10px",
+                fontSize: 20,
+              }}
+            >
+              <Entries
+                questions={questions}
+                userVotes={userVotes}
+                changeVote={changeVote}
+                pollId={pollId}
+                database={database}
+                users={users}
+              />
+              <AddQuestionField pollId={pollId} database={database} />
+              <UsernameDialog />
+            </div>
+          </div>
+          <Footer pollId={pollId} database={database} userVotes={userVotes} />
+        </>
+      )}
     </div>
   );
 };
+const useStyles = makeStyles({
+  loading: {
+    "&": {
+      width: "240px !important",
+      height: "240px !important",
+    },
+  },
+});
 export default Poll;

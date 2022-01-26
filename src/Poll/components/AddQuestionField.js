@@ -9,8 +9,7 @@ const AddQuestionField = ({ pollId, database }) => {
   const addNewQuestion = () => {
     if (newQuestion && newQuestion.trim().length > 0) {
       const questionsRef = ref(database, `polls/${pollId}/questions`);
-      const questionId = push(questionsRef, { text: newQuestion }).key;
-      set(ref(database, `polls/${pollId}/vote-count/${questionId}`), 0);
+      push(questionsRef, { text: newQuestion });
     }
   };
   return (

@@ -6,10 +6,10 @@ import RemoveDialog from "./RemoveDialog";
 const Entries = ({
   questions,
   userVotes,
-  voteCounts,
   changeVote,
   pollId,
   database,
+  users,
 }) => {
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [removeKey, setRemoveKey] = useState("");
@@ -28,9 +28,6 @@ const Entries = ({
           >
             <p style={{ flex: 1 }}>{obj.text}</p>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <p style={{ margin: "0px 0px 3px 0px", fontWeight: "bold" }}>
-                {voteCounts[obj.key]}
-              </p>
               <Checkbox
                 checked={userVotes[obj.key] ? true : false}
                 onChange={(e) => {
@@ -53,6 +50,7 @@ const Entries = ({
         );
       })}
       <RemoveDialog
+        users={users}
         pollId={pollId}
         database={database}
         removeKey={removeKey}

@@ -5,82 +5,99 @@ import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { set, ref } from "firebase/database";
-const Footer = ({ pollId, database, userVotes, voteCounts }) => {
+import LinearProgress from "@mui/material/LinearProgress";
+import Box from "@mui/material/Box";
+const Footer = ({ pollId, database, userVotes }) => {
   const [toastOpen, setToastOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const classes = useStyles();
   const confirmVotes = () => {
+    setLoading(true);
     const username = localStorage.getItem("username");
     const currentTimestamp = new Date().getTime();
-    set(ref(database, `polls/${pollId}/voters/${username}`), currentTimestamp);
-    set(ref(database, `votes/${username}`), userVotes);
-    set(ref(database, `polls/${pollId}/vote-count/`), voteCounts);
+    const promise1 = set(
+      ref(database, `polls/${pollId}/voters/${username}`),
+      currentTimestamp
+    );
+    const promise2 = set(
+      ref(database, `polls/${pollId}/votes/${username}`),
+      userVotes
+    );
+    Promise.all([promise1, promise2]).then(() => {
+      setLoading(false);
+      navigate(`/results/${pollId}`);
+    });
   };
   return (
-    <div
-      style={{
-        display: "flex",
-        marginTop: 10,
-        justifyContent: "space-between",
-        width: "50%",
-      }}
-    >
-      <Snackbar
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        open={toastOpen}
-        autoHideDuration={3000}
-        onClose={() => setToastOpen(false)}
-      >
-        <Alert severity="success" onClose={() => setToastOpen(false)}>
-          Link Copied!
-        </Alert>
-      </Snackbar>
+    <div style={{ width: "50%" }}>
       <div
         style={{
           display: "flex",
-          height: 30,
+          marginTop: 10,
+          justifyContent: "space-between",
         }}
       >
-        <input
-          readOnly
-          type="text"
-          id="copyText"
-          value={window.location.href}
-        />
-        <Button
-          variant="contained"
-          onClick={() => {
-            if (!navigator.clipboard) {
-              const copyText = document.querySelector("#copyText");
-              copyText.select();
-              document.execCommand("copy");
-              setToastOpen(true);
-            } else {
-              navigator.clipboard
-                .writeText(window.location.href)
-                .then(() => {
-                  console.log("link copied");
-                  setToastOpen(true);
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            }
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={toastOpen}
+          autoHideDuration={3000}
+          onClose={() => setToastOpen(false)}
+        >
+          <Alert severity="success" onClose={() => setToastOpen(false)}>
+            Link Copied!
+          </Alert>
+        </Snackbar>
+        <div
+          style={{
+            display: "flex",
+            height: 30,
           }}
         >
-          Copy
+          <input
+            readOnly
+            type="text"
+            id="copyText"
+            value={window.location.href}
+            style={{ marginRight: 4 }}
+          />
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (!navigator.clipboard) {
+                const copyText = document.querySelector("#copyText");
+                copyText.select();
+                document.execCommand("copy");
+                setToastOpen(true);
+              } else {
+                navigator.clipboard
+                  .writeText(window.location.href)
+                  .then(() => {
+                    console.log("link copied");
+                    setToastOpen(true);
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              }
+            }}
+          >
+            Copy
+          </Button>
+        </div>
+        <Button
+          onClick={confirmVotes}
+          className={classes.confirmButton}
+          variant="contained"
+        >
+          Confirm Votes
         </Button>
       </div>
-      <Button
-        onClick={() => {
-          confirmVotes();
-          navigate(`/results/${pollId}`);
-        }}
-        className={classes.confirmButton}
-        variant="contained"
-      >
-        Confirm Votes
-      </Button>
+      {loading && (
+        <Box sx={{ width: "100%", marginTop: "30px" }}>
+          <LinearProgress />
+        </Box>
+      )}
     </div>
   );
 };
