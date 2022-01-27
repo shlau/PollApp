@@ -7,8 +7,11 @@ import AddQuestionField from "./components/AddQuestionField";
 import { get, ref } from "firebase/database";
 import Entries from "./components/Entries";
 import { getArrFromObj } from "../utils";
+import { useNavigate } from "react-router-dom";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 const localStorage = window.localStorage;
 const Poll = ({ database }) => {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [userVotes, setUserVotes] = useState({});
   const [title, setTitle] = useState("");
@@ -35,18 +38,24 @@ const Poll = ({ database }) => {
     const pollRef = ref(database, `polls/${pollId}`);
     const username = localStorage.getItem("username");
     setLoading(true);
-    get(pollRef).then((snapshot) => {
-      const data = snapshot.val();
-      const pollQuestions = data.questions;
-      const formattedQuestions = getArrFromObj(pollQuestions, "key");
-      const users = data.votes ? data.votes[username] : {};
-      setQuestions(formattedQuestions);
-      setTitle(data["title"] || "");
-      setUserVotes(users);
-      setUsers(data["voters"] || {});
-      setLoading(false);
-    });
-  }, [pollId, database]);
+    get(pollRef)
+      .then((snapshot) => {
+        const data = snapshot.val();
+        const pollQuestions = data.questions;
+        const formattedQuestions = getArrFromObj(pollQuestions, "key");
+        const users = data.votes ? data.votes[username] : {};
+        setQuestions(formattedQuestions);
+        setTitle(data["title"] || "");
+        setUserVotes(users);
+        setUsers(data["voters"] || {});
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.log(e);
+        setLoading(false);
+        navigate("/");
+      });
+  }, [pollId, database, navigate]);
   const changeVote = (key, checked) => {
     setUserVotes((prevVotes) => ({ ...prevVotes, [key]: checked }));
   };
@@ -60,54 +69,60 @@ const Poll = ({ database }) => {
     };
   }, [updatePollData]);
   return (
-    <div className={"App-header"}>
-      {loading && <CircularLoading />}
-      {!loading && (
-        <>
-          <div style={{ width: "50%" }}>
-            <div
-              style={{
-                background: "cadetblue",
-                textAlign: "center",
-                padding: 10,
-              }}
-            >
-              {title}
+    <HelmetProvider>
+      <div className={"App-header"}>
+        <Helmet>
+          <meta charSet="utf-8" content={`${title}`} />
+          <title>Cyan Poll</title>
+        </Helmet>
+        {loading && <CircularLoading />}
+        {!loading && (
+          <>
+            <div style={{ width: "50%" }}>
+              <div
+                style={{
+                  background: "cadetblue",
+                  textAlign: "center",
+                  padding: 10,
+                }}
+              >
+                {title}
+              </div>
+              <div
+                style={{
+                  background: "#f0f2f5",
+                  color: "black",
+                  padding: "5px 10px 30px 10px",
+                  fontSize: 20,
+                }}
+              >
+                <Entries
+                  questions={questions}
+                  userVotes={userVotes}
+                  changeVote={changeVote}
+                  pollId={pollId}
+                  database={database}
+                  users={users}
+                  updateQuestion={updateQuestion}
+                />
+                <AddQuestionField
+                  pollId={pollId}
+                  database={database}
+                  updateQuestion={updateQuestion}
+                />
+                <UsernameDialog />
+              </div>
             </div>
-            <div
-              style={{
-                background: "#f0f2f5",
-                color: "black",
-                padding: "5px 10px 30px 10px",
-                fontSize: 20,
-              }}
-            >
-              <Entries
-                questions={questions}
-                userVotes={userVotes}
-                changeVote={changeVote}
-                pollId={pollId}
-                database={database}
-                users={users}
-                updateQuestion={updateQuestion}
-              />
-              <AddQuestionField
-                pollId={pollId}
-                database={database}
-                updateQuestion={updateQuestion}
-              />
-              <UsernameDialog />
-            </div>
-          </div>
-          <Footer
-            pollId={pollId}
-            database={database}
-            userVotes={userVotes}
-            updatePollData={updatePollData}
-          />
-        </>
-      )}
-    </div>
+            <Footer
+              pollId={pollId}
+              database={database}
+              userVotes={userVotes}
+              updatePollData={updatePollData}
+            />
+          </>
+        )}
+      </div>
+    </HelmetProvider>
   );
 };
 export default Poll;
