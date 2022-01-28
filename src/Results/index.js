@@ -47,9 +47,9 @@ const Results = ({ database }) => {
     });
     return count;
   };
-  questions.forEach((question) => {
+  questions.forEach((question, idx) => {
     const voteCount = getVoteCount(question);
-    chartData.push({ arg: question.text, val: voteCount });
+    chartData.push({ arg: `q${idx}`, val: voteCount });
   });
   const classes = useStyles();
   const navigate = useNavigate();
@@ -90,9 +90,9 @@ const Results = ({ database }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {questions.map((questionData) => {
+                  {questions.map((questionData,idx) => {
                     const row = [];
-                    const text = questionData.text;
+                    const text = `q${idx}) ${questionData.text}`;
                     row.push(
                       <TableCell key={text} component="th" scope="row">
                         {text}
@@ -119,7 +119,10 @@ const Results = ({ database }) => {
               </Table>
             </TableContainer>
           </div>
-          <Paper sx={{ width: 'fit-content', marginTop: 10, padding: 10 }}>
+          <Paper
+            className={classes.chart}
+            sx={{ width: "fit-content", marginTop: 10 }}
+          >
             <Chart title={"Results"} dataSource={chartData} id="chart">
               <Series type="bar" />
               <Legend visible={false} />
@@ -134,6 +137,11 @@ const useStyles = makeStyles({
   table: {
     "&": {
       width: "fit-content !important",
+    },
+  },
+  chart: {
+    "&": {
+      padding: 0,
     },
   },
 });
