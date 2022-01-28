@@ -46,8 +46,8 @@ const Footer = ({ pollId, database, userVotes, updatePollData }) => {
       <div
         style={{
           display: "flex",
-          marginTop: 10,
           justifyContent: "space-between",
+          flexWrap: "wrap",
         }}
       >
         <Snackbar
@@ -64,6 +64,7 @@ const Footer = ({ pollId, database, userVotes, updatePollData }) => {
           style={{
             display: "flex",
             height: 30,
+            marginTop: 10,
           }}
         >
           <input
@@ -97,7 +98,10 @@ const Footer = ({ pollId, database, userVotes, updatePollData }) => {
             Copy
           </Button>
         </div>
-        <div style={{ display: "flex" }} className={classes.navButton}>
+        <div
+          style={{ display: "flex", flexWrap: "wrap" }}
+          className={classes.navButton}
+        >
           <Button
             sx={{ marginRight: 1 }}
             onClick={() => {
@@ -131,6 +135,7 @@ const useStyles = makeStyles({
   navButton: {
     "& > .MuiButton-root": {
       height: 30,
+      marginTop: 10,
     },
   },
 });

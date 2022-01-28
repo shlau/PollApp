@@ -9,7 +9,14 @@ import Entries from "./components/Entries";
 import { getArrFromObj } from "../utils";
 import { useNavigate } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
+import { styled } from "@mui/material/styles";
 const localStorage = window.localStorage;
+const Root = styled("div")(({ theme }) => ({
+  width: "100%",
+  [theme.breakpoints.up("md")]: {
+    width: "50%",
+  },
+}));
 const Poll = ({ database }) => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
@@ -78,7 +85,7 @@ const Poll = ({ database }) => {
         {loading && <CircularLoading />}
         {!loading && (
           <>
-            <div style={{ width: "50%" }}>
+            <Root>
               <div
                 style={{
                   background: "cadetblue",
@@ -112,7 +119,7 @@ const Poll = ({ database }) => {
                 />
                 <UsernameDialog />
               </div>
-            </div>
+            </Root>
             <Footer
               pollId={pollId}
               database={database}

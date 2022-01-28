@@ -22,6 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "build-prod": "dotenv -e .env.production react-scripts build",
     "build-dev": "dotenv -e .env.development react-scripts build",
     "test": "react-scripts test",

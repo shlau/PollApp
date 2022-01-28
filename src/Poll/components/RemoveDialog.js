@@ -9,7 +9,7 @@ const RemoveDialog = ({
   removeDialogOpen,
   setRemoveDialogOpen,
   users,
-  updateQuestion
+  updateQuestion,
 }) => {
   const handleRemoveDialogClose = () => {
     setRemoveDialogOpen(false);
@@ -21,12 +21,16 @@ const RemoveDialog = ({
       updates[`polls/${pollId}/votes/${user}/${removeKey}`] = null;
     }
     update(ref(database), updates);
-    updateQuestion(removeKey)
+    updateQuestion(removeKey);
     setRemoveDialogOpen(false);
   };
   return (
-    <Dialog onClose={handleRemoveDialogClose} open={removeDialogOpen}>
-      <p style={{ fontWeight: "bold", padding: 5, width: 400 }}>
+    <Dialog
+      fullWidth={true}
+      onClose={handleRemoveDialogClose}
+      open={removeDialogOpen}
+    >
+      <p style={{ fontWeight: "bold", padding: 5, width: 'fit-content' }}>
         Are you sure you want to remove this question? This will remove the
         question for everyone in the poll.
       </p>

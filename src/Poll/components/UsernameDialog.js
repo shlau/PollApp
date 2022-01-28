@@ -19,7 +19,7 @@ const UsernameDialog = (props) => {
     }
   };
   return (
-    <Dialog onClose={handleDialogClose} open={dialogOpen}>
+    <Dialog onClose={handleDialogClose} fullWidth={true} open={dialogOpen}>
       <TextField
         error={invalidUsername}
         variant="filled"

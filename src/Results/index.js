@@ -119,7 +119,7 @@ const Results = ({ database }) => {
               </Table>
             </TableContainer>
           </div>
-          <Paper sx={{ minWidth: 560, marginTop: 10, padding: 10 }}>
+          <Paper sx={{ width: 'fit-content', marginTop: 10, padding: 10 }}>
             <Chart title={"Results"} dataSource={chartData} id="chart">
               <Series type="bar" />
               <Legend visible={false} />
