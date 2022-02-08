@@ -41,7 +41,7 @@ const Results = ({ database }) => {
     let count = 0;
     const key = question.key;
     voters.forEach((voter) => {
-      if (votes[voter][key]) {
+      if (votes && votes[voter] && votes[voter][key]) {
         count++;
       }
     });
@@ -99,7 +99,7 @@ const Results = ({ database }) => {
                       </TableCell>
                     );
                     voters.forEach((voter) => {
-                      const checked = votes[voter][questionData.key];
+                      const checked = votes && votes[voter] ? votes[voter][questionData.key] : false;
                       row.push(
                         <TableCell
                           sx={{
@@ -123,7 +123,7 @@ const Results = ({ database }) => {
             className={classes.chart}
             sx={{ width: "fit-content", marginTop: 10 }}
           >
-            <Chart title={"Results"} dataSource={chartData} id="chart">
+            <Chart title={pollData.title} dataSource={chartData} id="chart">
               <Series type="bar" />
               <Legend visible={false} />
             </Chart>

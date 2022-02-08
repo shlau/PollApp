@@ -21,6 +21,7 @@ const UsernameDialog = (props) => {
   return (
     <Dialog onClose={handleDialogClose} fullWidth={true} open={dialogOpen}>
       <TextField
+        autoFocus={true}
         error={invalidUsername}
         variant="filled"
         label="Enter a username"
