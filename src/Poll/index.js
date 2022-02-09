@@ -24,6 +24,7 @@ const Poll = ({ database }) => {
   const [title, setTitle] = useState("");
   const [users, setUsers] = useState({});
   const [loading, setLoading] = useState(true);
+  const [userDialogOpen, setUserDialogOpen] = useState(true);
   const { pollId } = useParams();
   const updateQuestion = (key, newVal) => {
     if (newVal != null) {
@@ -117,7 +118,10 @@ const Poll = ({ database }) => {
                   database={database}
                   updateQuestion={updateQuestion}
                 />
-                <UsernameDialog />
+                <UsernameDialog
+                  dialogOpen={userDialogOpen}
+                  setDialogOpen={setUserDialogOpen}
+                />
               </div>
             </Root>
             <Footer
@@ -125,6 +129,7 @@ const Poll = ({ database }) => {
               database={database}
               userVotes={userVotes}
               updatePollData={updatePollData}
+              setDialogOpen={setUserDialogOpen}
             />
           </>
         )}

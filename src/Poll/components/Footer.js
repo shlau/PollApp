@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { set, ref, get } from "firebase/database";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
 import CopyLink from "../../CopyLink";
-const Footer = ({ pollId, database, userVotes, updatePollData }) => {
-  const [toastOpen, setToastOpen] = useState(false);
+const Footer = ({
+  pollId,
+  database,
+  userVotes,
+  updatePollData,
+  setDialogOpen,
+}) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const classes = useStyles();
@@ -56,6 +59,15 @@ const Footer = ({ pollId, database, userVotes, updatePollData }) => {
           style={{ display: "flex", flexWrap: "wrap" }}
           className={classes.navButton}
         >
+          <Button
+            sx={{ marginRight: 1 }}
+            onClick={() => {
+              setDialogOpen(true);
+            }}
+            variant="contained"
+          >
+            Change Username
+          </Button>
           <Button
             sx={{ marginRight: 1 }}
             onClick={() => {
