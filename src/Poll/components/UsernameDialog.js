@@ -19,17 +19,23 @@ const UsernameDialog = (props) => {
     }
   };
   return (
-    <Dialog onClose={handleDialogClose} fullWidth={true} open={dialogOpen}>
-      <TextField
-        autoFocus={true}
-        error={invalidUsername}
-        variant="filled"
-        label="Enter a username"
-        onChange={(e) => {
-          setUsername(e.target.value);
-        }}
-      />
-      <Button onClick={handleDialogClose}>Ok</Button>
+    <Dialog
+      onClose={handleDialogClose}
+      fullWidth={true}
+      open={dialogOpen}
+    >
+      <div style={{ display: "flex", flexDirection: "column", padding: 10 }}>
+        <TextField
+          autoFocus={true}
+          error={invalidUsername}
+          variant="filled"
+          label="Enter a username :"
+          onChange={(e) => {
+            setUsername(e.target.value);
+          }}
+        />
+        <Button onClick={handleDialogClose}>Ok</Button>
+      </div>
     </Dialog>
   );
 };
