@@ -14,6 +14,7 @@ import Chart, { Legend, Series } from "devextreme-react/chart";
 import CircularLoading from "../CircularLoading";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import CopyLink from "../CopyLink";
 const Results = ({ database }) => {
   const { pollId } = useParams();
   const [pollData, setPollData] = useState({});
@@ -59,7 +60,10 @@ const Results = ({ database }) => {
       {!loading && (
         <>
           <div>
-            <div style={{ display: "flex", marginBottom: 2 }}>
+            <div
+              style={{ flexWrap: "wrap", display: "flex", marginBottom: 2 }}
+              className={classes.btns}
+            >
               <Button variant="contained" onClick={getPollData}>
                 Refresh
               </Button>
@@ -72,6 +76,18 @@ const Results = ({ database }) => {
               >
                 Return to Poll
               </Button>
+              <Button
+                variant="contained"
+                sx={{ marginLeft: 1 }}
+                onClick={() => {
+                  navigate(`/`);
+                }}
+              >
+                New Poll
+              </Button>
+              <CopyLink
+                style={{ marginLeft: 20, marginTop: 0, height: "auto" }}
+              />
             </div>
             <TableContainer className={classes.table} component={Paper}>
               <Table>
@@ -90,7 +106,7 @@ const Results = ({ database }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {questions.map((questionData,idx) => {
+                  {questions.map((questionData, idx) => {
                     const row = [];
                     const text = `q${idx}) ${questionData.text}`;
                     row.push(
@@ -99,7 +115,10 @@ const Results = ({ database }) => {
                       </TableCell>
                     );
                     voters.forEach((voter) => {
-                      const checked = votes && votes[voter] ? votes[voter][questionData.key] : false;
+                      const checked =
+                        votes && votes[voter]
+                          ? votes[voter][questionData.key]
+                          : false;
                       row.push(
                         <TableCell
                           sx={{
@@ -142,6 +161,11 @@ const useStyles = makeStyles({
   chart: {
     "&": {
       padding: 0,
+    },
+  },
+  btns: {
+    "& > *": {
+      marginBottom: "5px !important",
     },
   },
 });

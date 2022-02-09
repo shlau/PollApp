@@ -7,6 +7,7 @@ import { makeStyles } from "@mui/styles";
 import { set, ref, get } from "firebase/database";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
+import CopyLink from "../../CopyLink";
 const Footer = ({ pollId, database, userVotes, updatePollData }) => {
   const [toastOpen, setToastOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,54 +51,7 @@ const Footer = ({ pollId, database, userVotes, updatePollData }) => {
           flexWrap: "wrap",
         }}
       >
-        <Snackbar
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          open={toastOpen}
-          autoHideDuration={3000}
-          onClose={() => setToastOpen(false)}
-        >
-          <Alert severity="success" onClose={() => setToastOpen(false)}>
-            Link Copied!
-          </Alert>
-        </Snackbar>
-        <div
-          style={{
-            display: "flex",
-            height: 30,
-            marginTop: 10,
-          }}
-        >
-          <input
-            readOnly
-            type="text"
-            id="copyText"
-            value={window.location.href}
-            style={{ marginRight: 4 }}
-          />
-          <Button
-            variant="contained"
-            onClick={() => {
-              if (!navigator.clipboard) {
-                const copyText = document.querySelector("#copyText");
-                copyText.select();
-                document.execCommand("copy");
-                setToastOpen(true);
-              } else {
-                navigator.clipboard
-                  .writeText(window.location.href)
-                  .then(() => {
-                    console.log("link copied");
-                    setToastOpen(true);
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
-              }
-            }}
-          >
-            Copy
-          </Button>
-        </div>
+        <CopyLink />
         <div
           style={{ display: "flex", flexWrap: "wrap" }}
           className={classes.navButton}
