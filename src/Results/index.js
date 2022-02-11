@@ -96,7 +96,13 @@ const Results = ({ database }) => {
                     <TableCell>{""}</TableCell>
                     {voters.map((voter) => (
                       <TableCell
-                        sx={{ color: "white", fontWeight: "bold" }}
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                          borderLeft: "1px solid black",
+                          overflowWrap: "break-word",
+                          maxWidth: 100
+                        }}
                         key={voter}
                       >
                         {" "}
@@ -125,6 +131,7 @@ const Results = ({ database }) => {
                             color: "white",
                             background: checked ? "#24a346" : "#940f1c",
                             borderRight: "1px solid white",
+                            width: 90,
                           }}
                           key={text + voter}
                         >
